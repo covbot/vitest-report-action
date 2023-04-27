@@ -9,6 +9,7 @@ import {
 import { GithubRef } from '../../src/typings/Options';
 
 vi.mock('@actions/exec');
+vi.mock('@actions/core');
 
 const clearMocks = () => {
     vi.mocked(exec).mockClear();
