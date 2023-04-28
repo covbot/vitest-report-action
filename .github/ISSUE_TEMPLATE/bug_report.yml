@@ -17,6 +17,14 @@ body:
     required: true
 - type: dropdown
   attributes:
+    label: Action version
+    multiple: true
+    options:
+      - v1
+  validations:
+    required: true
+- type: dropdown
+  attributes:
     label: Runner operating system
     description: In which OS you are running this action, so the bug occurs?
     multiple: true
