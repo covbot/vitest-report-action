@@ -1,0 +1,43 @@
+name: Bug report
+description: Create a report to help us improve
+labels: bug
+assignees: ArtiomTr
+body:
+- type: textarea
+  attributes:
+    label: Describe a bug
+    placeholder: Add some description for bug.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Expected behavior
+    placeholder: Please, describe expected behavior.
+  validations:
+    required: true
+- type: dropdown
+  attributes:
+    label: Runner operating system
+    description: In which OS you are running this action, so the bug occurs?
+    multiple: true
+    options:
+      - windows
+      - linux
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: action.yml
+    description: Workflow file, which you are using to trigger this action. This will be automatically formatted into code, so no need for backticks.
+    render: yaml
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Relevant log output
+    description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+    render: shell
+- type: textarea
+  attributes:
+    label: Additional context
+    description: Describe any additional information, if necessary.
