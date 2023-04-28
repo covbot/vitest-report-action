@@ -31,7 +31,8 @@
         "parse-diff": "^0.9.0",
         "semver": "^7.3.5",
         "strip-ansi": "^6.0.0",
-        "yup": "^0.32.9"
+        "yup": "^0.32.9",
+        "zod": "^3.21.4"
     },
     "devDependencies": {
         "@octokit/openapi-types": "^12.11.0",

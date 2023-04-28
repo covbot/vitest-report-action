@@ -34,6 +34,9 @@ dependencies:
   yup:
     specifier: ^0.32.9
     version: 0.32.9
+  zod:
+    specifier: ^3.21.4
+    version: 3.21.4
 
 devDependencies:
   '@octokit/openapi-types':
@@ -2620,4 +2623,8 @@ packages:
       nanoclone: 0.2.1
       property-expr: 2.0.4
       toposort: 2.0.2
+    dev: false
+
+  /zod@3.21.4:
+    resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
     dev: false
