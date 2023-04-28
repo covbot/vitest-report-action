@@ -32,14 +32,10 @@ export const createCoverageAnnotations = (
     Object.entries(jsonReport.coverageMap).forEach(
         ([fileName, fileCoverage]) => {
             const normalizedFilename = relative(process.cwd(), fileName);
-            const normalizedFileCoverage =
-                'statementMap' in fileCoverage
-                    ? fileCoverage
-                    : fileCoverage.data;
 
-            Object.entries(normalizedFileCoverage.statementMap).forEach(
+            Object.entries(fileCoverage.statementMap).forEach(
                 ([statementIndex, statementCoverage]) => {
-                    if (normalizedFileCoverage.s[+statementIndex] === 0) {
+                    if (fileCoverage.s[+statementIndex] === 0) {
                         annotations.push({
                             ...getLocation(
                                 statementCoverage.start,
@@ -54,13 +50,13 @@ export const createCoverageAnnotations = (
                 }
             );
 
-            Object.entries(normalizedFileCoverage.branchMap).forEach(
+            Object.entries(fileCoverage.branchMap).forEach(
                 ([branchIndex, branchCoverage]) => {
                     if (branchCoverage.locations) {
                         branchCoverage.locations.forEach(
                             (location, locationIndex) => {
                                 if (
-                                    normalizedFileCoverage.b[+branchIndex][
+                                    fileCoverage.b[+branchIndex][
                                         locationIndex
                                     ] === 0
                                 ) {
@@ -83,9 +79,9 @@ export const createCoverageAnnotations = (
                 }
             );
 
-            Object.entries(normalizedFileCoverage.fnMap).forEach(
+            Object.entries(fileCoverage.fnMap).forEach(
                 ([functionIndex, functionCoverage]) => {
-                    if (normalizedFileCoverage.f[+functionIndex] === 0) {
+                    if (fileCoverage.f[+functionIndex] === 0) {
                         annotations.push({
                             ...getLocation(
                                 functionCoverage.decl.start,

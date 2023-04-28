@@ -1,6 +1,5 @@
 import { collectCoverage } from './collectCoverage';
 import { installDependencies } from './installDependencies';
-import { parseCoverage } from './parseCoverage';
 import { runTest } from './runTest';
 import { ActionError } from '../typings/ActionError';
 import { JsonReport } from '../typings/JsonReport';
@@ -44,7 +43,7 @@ export const getCoverage = async (
         await runTest(options.testScript, options.workingDirectory);
     });
 
-    const [isCoverageCollected, rawCoverage] = await runStage(
+    const [isJsonReportParsed, jsonReport] = await runStage(
         'collectCoverage',
         dataCollector,
         () =>
@@ -55,21 +54,7 @@ export const getCoverage = async (
             )
     );
 
-    const [coverageParsed, jsonReport] = await runStage(
-        'parseCoverage',
-        dataCollector,
-        async (skip) => {
-            if (!isCoverageCollected) {
-                skip();
-            }
-
-            const jsonReport = parseCoverage(rawCoverage!);
-
-            return jsonReport;
-        }
-    );
-
-    if (!coverageParsed || !jsonReport) {
+    if (!isJsonReportParsed || !jsonReport) {
         throw new ActionError(FailReason.FAILED_GETTING_COVERAGE);
     }
 

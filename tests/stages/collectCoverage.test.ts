@@ -2,9 +2,11 @@ import { sep } from 'path';
 
 import { readFile } from 'fs-extra';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createFixture } from 'zod-fixture';
 
 import { collectCoverage } from '../../src/stages/collectCoverage';
 import { ActionError } from '../../src/typings/ActionError';
+import { reportSchema } from '../../src/typings/JsonReport';
 import { FailReason } from '../../src/typings/Report';
 import { createDataCollector } from '../../src/utils/DataCollector';
 
@@ -17,36 +19,76 @@ const clearMocks = () => {
 
 beforeEach(clearMocks);
 
+const createReportFixture = () => {
+    const fixture = createFixture(reportSchema);
+
+    const mockedReportSource = Object.fromEntries(
+        Object.entries(fixture).filter(([key]) => key !== 'coverageMap')
+    );
+    const mockedReport = JSON.stringify(mockedReportSource);
+    const mockedCoverageMap = JSON.stringify(fixture.coverageMap);
+
+    return {
+        fullReport: fixture,
+        runReport: mockedReport,
+        coverageMap: mockedCoverageMap,
+    };
+};
+
 describe('collectCoverage', () => {
-    it('should read report.json by default', async () => {
+    it('should read report.json and coverage/coverage-final.json by default', async () => {
         const dataCollector = createDataCollector();
 
-        vi.mocked(readFile).mockImplementationOnce(() =>
-            Promise.resolve(Buffer.from('Value'))
-        );
+        const { fullReport, coverageMap, runReport } = createReportFixture();
 
-        await expect(collectCoverage(dataCollector)).resolves.toBe('Value');
-        expect(readFile).toBeCalledWith('report.json');
+        vi.mocked(readFile).mockImplementation(async (path) => {
+            console.log(path);
+            if (path === 'report.json') {
+                return Buffer.from(runReport);
+            }
+
+            if (path === `coverage${sep}coverage-final.json`) {
+                return Buffer.from(coverageMap);
+            }
+
+            throw new Error('File not found');
+        });
+
+        await expect(collectCoverage(dataCollector)).resolves.toStrictEqual(
+            fullReport
+        );
     });
 
-    it('should read report.json from correct path when working directory is provided', async () => {
+    it('should read report.json & coverage-final.json from correct path when working directory is provided', async () => {
         const dataCollector = createDataCollector();
+        const { fullReport, coverageMap, runReport } = createReportFixture();
 
-        vi.mocked(readFile).mockImplementationOnce(() =>
-            Promise.resolve(Buffer.from('New value'))
-        );
+        vi.mocked(readFile).mockImplementation(async (path) => {
+            if (path === `customFolder${sep}report.json`) {
+                return Buffer.from(runReport);
+            }
+
+            if (
+                path === `customFolder${sep}coverage${sep}coverage-final.json`
+            ) {
+                return Buffer.from(coverageMap);
+            }
+
+            throw new Error('File not found');
+        });
 
         await expect(
             collectCoverage(dataCollector, 'customFolder')
-        ).resolves.toBe('New value');
-        expect(readFile).toBeCalledWith(`customFolder${sep}report.json`);
+        ).resolves.toStrictEqual(fullReport);
     });
 
     it('should read report from correct path when working directory and custom report path is provided', async () => {
         const dataCollector = createDataCollector();
 
+        const fixture = createFixture(reportSchema);
+
         vi.mocked(readFile).mockImplementationOnce(() =>
-            Promise.resolve(Buffer.from('New value'))
+            Promise.resolve(Buffer.from(JSON.stringify(fixture)))
         );
 
         await expect(
@@ -55,7 +97,7 @@ describe('collectCoverage', () => {
                 'customFolder',
                 './customReport.json'
             )
-        ).resolves.toBe('New value');
+        ).resolves.toStrictEqual(fixture);
         expect(readFile).toBeCalledWith(`customFolder${sep}customReport.json`);
     });
 

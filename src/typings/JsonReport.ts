@@ -1,108 +1,88 @@
-export type JsonReport = {
-    numFailedTestSuites: number;
-    numFailedTests: number;
-    numPassedTestSuites: number;
-    numPassedTests: number;
-    numPendingTestSuites: number;
-    numPendingTests: number;
-    numRuntimeErrorTestSuites: number;
-    numTodoTests: number;
-    numTotalTestSuites: number;
-    numTotalTests: number;
-    openHandles?: unknown[];
-    snapshot: Snapshot;
-    startTime: number;
-    success: boolean;
-    testResults?: TestResult[];
-    wasInterrupted: boolean;
-    coverageMap: CoverageMap;
-};
+import { z } from 'zod';
 
-export type Snapshot = {
-    added: number;
-    didUpdate: boolean;
-    failure: boolean;
-    filesAdded: number;
-    filesRemoved: number;
-    filesRemovedList?: unknown[];
-    filesUnmatched: number;
-    filesUpdated: number;
-    matched: number;
-    total: number;
-    unchecked: number;
-    uncheckedKeysByFile?: unknown[];
-    unmatched: number;
-    updated: number;
-};
+const location = z.object({
+    column: z.number().optional(),
+    line: z.number(),
+});
 
-export type TestResult = {
-    assertionResults?: AssertionResult[];
-    endTime: number;
-    message: string;
-    name: string;
-    startTime: number;
-    status: string;
-    summary: string;
-};
+const range = z.object({
+    start: location.optional(),
+    end: location.optional(),
+});
 
-export type AssertionResult = {
-    ancestorTitles?: string[];
-    failureMessages?: string[];
-    fullName: string;
-    location: Location;
-    status: string;
-    title: string;
-};
+const statementCoverage = z.object({
+    start: location,
+    end: location,
+});
 
-export type Location = {
-    column?: number;
-    line: number;
-};
+const statementMap = z.record(z.coerce.number(), statementCoverage);
 
-export type Range = {
-    start?: Location;
-    end?: Location;
-};
+const functionCoverage = z.object({
+    decl: range,
+});
 
-export type CoverageMap = Record<string, FileCoverage | FileCoverageInData>;
+const fnMap = z.record(z.coerce.number(), functionCoverage);
 
-export type FileCoverage = {
-    path: string;
-    statementMap: StatementMap;
-    fnMap: FunctionMap;
-    branchMap: BranchMap;
-    s: HitMap;
-    f: HitMap;
-    b: ArrayHitMap;
-};
+const branchCoverage = z.object({
+    locations: z.array(range).optional(),
+});
 
-export type FileCoverageInData = {
-    data: FileCoverage;
-};
+const branchMap = z.record(z.coerce.number(), branchCoverage);
 
-export type StatementMap = Record<number, StatementCoverage>;
+const hitMap = z.record(z.coerce.number(), z.number());
 
-export type StatementCoverage = {
-    start: Location;
-    end: Location;
-};
+const branchHitMap = z.record(z.coerce.number(), z.array(z.number()));
 
-export type FunctionMap = Record<number, FunctionCoverage>;
+const fileCoverage = z.object({
+    path: z.string(),
+    statementMap,
+    fnMap,
+    branchMap,
+    s: hitMap,
+    f: hitMap,
+    b: branchHitMap,
+});
 
-export type FunctionCoverage = {
-    name: string;
-    decl: Range;
-    loc: Range;
-};
+const assertionResult = z.object({
+    status: z.string(),
+    location: location,
+    title: z.string(),
+    ancestorTitles: z.array(z.string()).optional(),
+    failureMessages: z.array(z.string()).optional(),
+});
 
-export type BranchMap = Record<number, BranchCoverage>;
+const testResult = z.object({
+    status: z.string(),
+    name: z.string(),
+    message: z.string(),
+    assertionResults: z.array(assertionResult).optional(),
+});
 
-export type BranchCoverage = {
-    loc: Range;
-    type: string;
-    locations?: Range[];
-};
+const coverageMap = z.record(
+    z.string(),
+    z.union([
+        fileCoverage,
+        z
+            .object({
+                data: fileCoverage,
+            })
+            .transform((value) => value.data),
+    ])
+);
 
-export type HitMap = Record<number, number>;
+export const reportSchema = z.object({
+    success: z.boolean(),
+    numPassedTests: z.number(),
+    numPassedTestSuites: z.number(),
+    numFailedTests: z.number(),
+    numFailedTestSuites: z.number(),
+    numTotalTests: z.number(),
+    numTotalTestSuites: z.number(),
+    coverageMap,
+    testResults: z.array(testResult).optional(),
+});
 
-export type ArrayHitMap = Record<number, number[]>;
+export type JsonReport = z.infer<typeof reportSchema>;
+export type FileCoverage = z.infer<typeof fileCoverage>;
+export type Location = z.infer<typeof location>;
+export type CoverageMap = z.infer<typeof coverageMap>;
