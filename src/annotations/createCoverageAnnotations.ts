@@ -24,6 +24,7 @@ const getLocation = (
         : {}),
 });
 
+// dummy change
 export const createCoverageAnnotations = (
     jsonReport: JsonReport
 ): Array<Annotation> => {
