@@ -110,7 +110,7 @@ export const collectCoverage = async (
     if (!parseResult.success) {
         dataCollector.info(
             'Report did not match the schema. Issues: ' +
-                JSON.stringify(parseResult.error.flatten())
+                JSON.stringify(parseResult.error.format())
         );
         throw new ActionError(FailReason.INVALID_COVERAGE_FORMAT);
     }
