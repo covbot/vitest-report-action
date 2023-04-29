@@ -27,9 +27,9 @@ const functionCoverage = z.object({
 const fnMap = z.record(z.coerce.number(), functionCoverage);
 
 const branchCoverage = z.object({
-    locations: z.array(range).nullish(),
+    locations: z.array(range).nullish().transform(nullishTransform),
 });
-nullishTransform;
+
 const branchMap = z.record(z.coerce.number(), branchCoverage);
 
 const hitMap = z.record(z.coerce.number(), z.number());
@@ -48,7 +48,7 @@ const fileCoverage = z.object({
 
 const assertionResult = z.object({
     status: z.string(),
-    location: location,
+    location: location.nullish().transform(nullishTransform),
     title: z.string(),
     ancestorTitles: z.array(z.string()).nullish().transform(nullishTransform),
     failureMessages: z.array(z.string()).nullish().transform(nullishTransform),
@@ -87,7 +87,7 @@ export const reportSchema = z.object({
     coverageMap,
     testResults: z.array(testResult).nullish().transform(nullishTransform),
 });
-nullishTransform;
+
 export type JsonReport = z.infer<typeof reportSchema>;
 export type FileCoverage = z.infer<typeof fileCoverage>;
 export type Location = z.infer<typeof location>;
