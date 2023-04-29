@@ -1,13 +1,16 @@
 import { z } from 'zod';
 
+const nullishTransform = <T>(value: T | null | undefined) =>
+    value === null ? undefined : value;
+
 const location = z.object({
-    column: z.number().optional(),
+    column: z.number().nullish().transform(nullishTransform),
     line: z.number(),
 });
 
 const range = z.object({
-    start: location.optional(),
-    end: location.optional(),
+    start: location.nullish().transform(nullishTransform),
+    end: location.nullish().transform(nullishTransform),
 });
 
 const statementCoverage = z.object({
@@ -24,9 +27,9 @@ const functionCoverage = z.object({
 const fnMap = z.record(z.coerce.number(), functionCoverage);
 
 const branchCoverage = z.object({
-    locations: z.array(range).optional(),
+    locations: z.array(range).nullish(),
 });
-
+nullishTransform;
 const branchMap = z.record(z.coerce.number(), branchCoverage);
 
 const hitMap = z.record(z.coerce.number(), z.number());
@@ -47,15 +50,18 @@ const assertionResult = z.object({
     status: z.string(),
     location: location,
     title: z.string(),
-    ancestorTitles: z.array(z.string()).optional(),
-    failureMessages: z.array(z.string()).optional(),
+    ancestorTitles: z.array(z.string()).nullish().transform(nullishTransform),
+    failureMessages: z.array(z.string()).nullish().transform(nullishTransform),
 });
 
 const testResult = z.object({
     status: z.string(),
     name: z.string(),
     message: z.string(),
-    assertionResults: z.array(assertionResult).optional(),
+    assertionResults: z
+        .array(assertionResult)
+        .nullish()
+        .transform(nullishTransform),
 });
 
 const coverageMap = z.record(
@@ -79,9 +85,9 @@ export const reportSchema = z.object({
     numTotalTests: z.number(),
     numTotalTestSuites: z.number(),
     coverageMap,
-    testResults: z.array(testResult).optional(),
+    testResults: z.array(testResult).nullish().transform(nullishTransform),
 });
-
+nullishTransform;
 export type JsonReport = z.infer<typeof reportSchema>;
 export type FileCoverage = z.infer<typeof fileCoverage>;
 export type Location = z.infer<typeof location>;
