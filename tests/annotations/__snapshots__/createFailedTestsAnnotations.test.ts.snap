@@ -20,6 +20,14 @@ exports[`createFailedTestsAnnotations > should create failed tests annotations 1
   },
   {
     "annotation_level": "failure",
+    "end_line": 0,
+    "message": "",
+    "path": "tests/format/summary/getTestRunSummary.test.ts",
+    "start_line": 0,
+    "title": undefined,
+  },
+  {
+    "annotation_level": "failure",
     "end_line": 23,
     "message": "",
     "path": "tests/format/summary/getTestRunSummary.test.ts",
